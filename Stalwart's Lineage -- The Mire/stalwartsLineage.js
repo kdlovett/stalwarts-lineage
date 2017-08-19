@@ -41,6 +41,13 @@ var moorlordText = 0;
 var win = 0;
 var winning = 0;
 var gameStart = 1;
+var mute = 0;
+
+var introText = 0;
+
+//Maintains songs in the game
+var introSong = new sound("the_burden_of_the_birthright.wav");
+var midSong = new sound("urgency_remake.wav");
 
 
 //Listens to they keyboard for control either key "down" or "up".
@@ -51,7 +58,8 @@ window.addEventListener("keyup", boatStop, false);
 setTimeout(irisTurnReload, 4000);
 setTimeout(skullFlapReload, 300);
 
-setTimeout(beginGame, 20000);
+//setTimeout(beginGame, 20000);
+setTimeout(introTextAdvance, 5000);
  
 
 function boatMove(e) {
@@ -408,19 +416,35 @@ function resetMoorlordText(){
     moorlordText = 0;
 }
 
-function beginGame() {
+function introTextAdvance() {
     //Begins actual game after intro is over. Enables shooting, etc.
-    gameStart = 0;
-    canShoot = 1;
-    canRaise = 1;
-    canCatch = 1;
-    setTimeout(beginningText, 5000);
+    if (introText != 12) {
+        setTimeout(introTextAdvance, 5000);
+    } else {
+        gameStart = 0;
+        canShoot = 1;
+        canRaise = 1;
+        canCatch = 1;
+        setTimeout(beginningText, 8000);
+    }
+    introText += 1;
 }
 
 function beginningText() {
     //Begins first text of game.
     javertText = 6;
     setTimeout(resetJavertText, 5000);
+
+    introSong.stop();
+    if (mute != 1) {
+        midSongUpdate();
+    }
+
+}
+
+function midSongUpdate() {
+    midSong.play();
+    setTimeout(midSongUpdate, 1);
 }
 
 function winScreen() {
@@ -467,6 +491,7 @@ function createEnvironment(){
     boatwave6 = new component(32,32, "boatwave.gif", 350,275, "image");
     passage = new component(74,67, "passage.gif", 800,185, "image");
     blackScreen = new component(640, 350, "#000000", 320, 175, "shape");
+    introScreen = new component(640, 480, "introImage.gif", 320, 235, "image");
 }
 
 function createCharacters(){
@@ -496,6 +521,9 @@ function startGame() {
     createEnvironment();
     createCharacters();
     createBoat();
+    if (mute != 1) {
+        introSong.play();
+    }
 
     animFrame.start();
 }
@@ -504,6 +532,14 @@ function stopGame() {
     //Ends the game, changing the dimensions of the canvas.
     animFrame.stop();
     animFrame.clear();
+    introSong.stop();
+    midSong.stop();
+}
+
+function muteGame() {
+    introSong.stop();
+    midSong.stop();
+    mute = 1;
 }
 
 var animFrame = {
@@ -567,6 +603,22 @@ function component(width, height, color, x, y, type) {
             this.invincible = 0;
         }
     }
+}
+
+function sound(src) {
+    //Constructor for sound
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }    
 }
 
 function updateEnvironmentBackground() {
@@ -983,15 +1035,45 @@ function updateAnimFrame() {
         animFrame.context.strokeText("...to the rivers, mountains, and forests...",320,200);
     } else if (gameStart == 1){
         //Game start text.
-        blackScreen.update();
+        introScreen.update();
+        if (introScreen.y > 150){
+            introScreen.y -= .05;
+        }
         animFrame.context.textAlign = "center";
         animFrame.context.font = "20px Sans Serif";
-        animFrame.context.strokeStyle="#26ff00";
-        animFrame.context.strokeText("Somewhere in the dark heart of the swamps,",320,50);
-        animFrame.context.strokeText("...Master sailor JAVERT, along with the knowledgable treasure hunter IRIS...",320,100);
-        animFrame.context.strokeText("...Make haste to rescue STALWART from the power of the MOORLORD...",320,150);
-        animFrame.context.strokeText("...and along the way, take aboard...",320,200);
-        animFrame.context.strokeText("...the farmer LAWRENCE in hopes to bring him to safety...", 320, 250);
+        animFrame.context.strokeStyle="white";
+        if (introText == 0) {
+            animFrame.context.strokeText("A perfect_boy production",320,150);
+        } else if (introText == 1) {
+            animFrame.context.strokeText("Designed and programmed by Keith Daniel Lovett",320,150);
+        } else if (introText == 2) {
+            animFrame.context.strokeText("Music and creative help by Addison Clark Dowell",320,150);
+        } else if (introText == 3) {
+            animFrame.context.font = "35px Sans Serif";
+            animFrame.context.strokeStyle="#26ff00";
+            animFrame.context.strokeText("STALWART'S LINEAGE: THE MIRE",320,150);
+        } else if (introText == 4) {
+            animFrame.context.font = "20px Sans Serif";
+            animFrame.context.strokeStyle="white";
+            animFrame.context.strokeText("...Somewhere in the dark heart of the swamps...", 320,150);
+        } else if (introText == 5) {
+            animFrame.context.strokeText("...Master sailor JAVERT, along with knowledgable treasure hunter IRIS...", 320,150);
+        } else if (introText == 6) {
+            animFrame.context.strokeText("...Make hast to rescue STALWART from the power of the MOORLORD...", 320,150);
+        } else if (introText == 7) {
+            animFrame.context.strokeText("...And in their journeys, take aboard farmer LAWRENCE of ATAVAS...", 320,150);
+        } else if (introText == 8) {
+            animFrame.context.strokeText("...in hopes to bring them both to safety...", 320,150);
+        } else if (introText == 9) {
+            animFrame.context.strokeText("...before it is too late...", 320,150);
+        } else if (introText == 10) {
+            animFrame.context.strokeText("...", 320,150);
+        }
+        //animFrame.context.strokeText("Somewhere in the dark heart of the swamps,",320,50);
+        //animFrame.context.strokeText("...Master sailor JAVERT, along with the knowledgable treasure hunter IRIS...",320,100);
+        //animFrame.context.strokeText("...Make haste to rescue STALWART from the power of the MOORLORD...",320,150);
+        //animFrame.context.strokeText("...and along the way, take aboard...",320,200);
+        //animFrame.context.strokeText("...the farmer LAWRENCE in hopes to bring him to safety...", 320, 250);
     }
 
     //Checks if the x and y are appropriate to inflict damage, and the enemy is on-screen.
