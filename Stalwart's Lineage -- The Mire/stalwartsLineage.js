@@ -40,10 +40,10 @@ var moorlordText = 0;
 //Maintains various aspects of gameplay control.
 var win = 0;
 var winning = 0;
+var introText = 0;
 var gameStart = 1;
 var mute = 0;
-
-var introText = 0;
+var mouseToggle = 0;
 
 //Maintains songs in the game
 var introSong = new sound("the_burden_of_the_birthright.wav");
@@ -65,18 +65,14 @@ setTimeout(introTextAdvance, 5000);
 function boatMove(e) {
     switch (e.keyCode) {
         //"W" key moves cannon up
-        
-        //Will revisit if the mouse thing doesn't work
-
-        /**case 87:
+        case 87:
             cannonMovement = 1;
             break;
-            //"D" key moves cannon down
+        //"D" key moves cannon down
         case 83:
             cannonMovement = -1;
             break;
-            //"A" key commences fire.
-        */
+        //"A" key commences fire.
         case 65:
             if (canShoot == 1 && ammunition > 0) {
                 ammunition -= 1;
@@ -93,7 +89,7 @@ function boatMove(e) {
                 }
             }
             break;
-            //"F" key raises apple.
+        //"F" key raises apple.
         case 70:
             if (canRaise == 1) {
                 //Raising apple.
@@ -104,7 +100,7 @@ function boatMove(e) {
                 setTimeout(appleWait, 1500);
             }
             break;
-            //"E" key to commence catching a skull.
+        //"E" key to commence catching a skull.
         case 69:
             if (canCatch == 1) {
                 //Closing arms.
@@ -115,7 +111,7 @@ function boatMove(e) {
                 setTimeout(catchWait, 800);
             }
             break;
-            //"D" key to commence repairs on the boat.
+        //"D" key to commence repairs on the boat.
         case 68:
             if (repairKits > 0 && repairing == 0) {
                 repairing = 1;
@@ -429,7 +425,6 @@ function introTextAdvance() {
         canRaise = 1;
         canCatch = 1;
         setTimeout(beginningText, 8000);
-        animFrame.canvas.addEventListener("mousemove", mouseMove);
     }
     introText += 1;
 }
@@ -447,13 +442,25 @@ function beginningText() {
 }
 
 function midSongUpdate() {
-    midSong.play();
-    setTimeout(midSongUpdate, 1);
+    if (mute != 1) {
+        midSong.play();
+        setTimeout(midSongUpdate, 1);
+    }
 }
 
 function winScreen() {
     //Used to delay going to win screen until after text by Javert.
     win = 1;
+}
+
+function toggleMouse() {
+    if (mouseToggle == 0) {
+        animFrame.canvas.addEventListener("mousemove", mouseMove);
+        mouseToggle = 1;
+    } else {
+        animFrame.canvas.removeEventListener("mousemove", mouseMove);
+        mouseToggle = 0;
+    }
 }
 
 function createEnvironment() {
@@ -808,7 +815,14 @@ function mouseMove(e){
     }
 
     cannon.angle = Math.atan2((mouseX - 2*mouseX), mouseY);
-    cannon.update();
+
+    if(mouseX <= cannon.x) {
+        stalwart.x = 255;
+        stalwart.image.src = "stalwartFaceLeft.gif";
+    } else {
+        stalwart.x = 235;
+        stalwart.image.src = "stalwartFaceRight.gif";
+    }
 }
 
 function updateBoat() {
@@ -819,21 +833,20 @@ function updateBoat() {
     javert.update();
     iris.update();
     lawrence.update();
-    /**Depending on the key that is pressed and current position of the cannon, either don't shift cannon, or move left or right.
+    //Depending on the key that is pressed and current position of the cannon, either don't shift cannon, or move left or right.
     if (cannonMovement == 1 && cannon.angle + 5 * Math.PI / 180 <= 360 * Math.PI / 180) {
         cannon.angle += 4 * Math.PI / 180;
     } else if (cannonMovement == -1 && cannon.angle + 5 * Math.PI / 180 >= 0 * Math.PI / 180) {
         cannon.angle -= 4 * Math.PI / 180;
     }
     //If cannon is facing left or right, Stalwart should face left or right, respectively.
-    if (cannon.angle <= Math.PI) {
+    if (cannon.angle <= Math.PI && cannonMovement != 0) {
         stalwart.x = 255;
         stalwart.image.src = "stalwartFaceLeft.gif";
-    } else {
+    } else if (cannon.angle > Math.PI && cannonMovement != 0) {
         stalwart.x = 235;
         stalwart.image.src = "stalwartFaceRight.gif";
     }
-    */
     cannon.update();
     
     //Adjusts the speed of the boat in accordance with its current health.
@@ -1081,7 +1094,7 @@ function updateAnimFrame() {
         } else if (introText == 1) {
             animFrame.context.strokeText("Designed and programmed by Keith Daniel Lovett", 320, 150);
         } else if (introText == 2) {
-            animFrame.context.strokeText("Music and creative help by Addison Clark Dowell", 320, 150);
+            animFrame.context.strokeText("Music and  programming by Addison Clark Dowell", 320, 150);
         } else if (introText == 3) {
             animFrame.context.font = "35px Sans Serif";
             animFrame.context.strokeStyle = "#26ff00";
@@ -1103,11 +1116,6 @@ function updateAnimFrame() {
         } else if (introText == 10) {
             animFrame.context.strokeText("...", 320, 150);
         }
-        //animFrame.context.strokeText("Somewhere in the dark heart of the swamps,",320,50);
-        //animFrame.context.strokeText("...Master sailor JAVERT, along with the knowledgable treasure hunter IRIS...",320,100);
-        //animFrame.context.strokeText("...make haste to rescue STALWART from the power of the MOORLORD...",320,150);
-        //animFrame.context.strokeText("...and along the way, take aboard...",320,200);
-        //animFrame.context.strokeText("...the farmer LAWRENCE in hopes to bring him to safety...", 320, 250);
     }
 
     //Checks if the x and y are appropriate to inflict damage, and the enemy is on-screen.
