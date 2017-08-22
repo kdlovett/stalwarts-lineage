@@ -790,8 +790,12 @@ function updateEnvironmentMidground() {
 }
 
 function mouseMove(e){
-    var mouseX, mouseY;
+    //Handles any actions concerning the movement of the mouse.
 
+    //mouseX, Y are global, relativeX, Y are relative to the cannon itself
+    var mouseX, mouseY, relativeX, relativeY;
+
+    //Detertimes x and y of mouse.
     if(e.offsetX) {
         mouseX = e.offsetX;
         mouseY = e.offsetY;
@@ -801,21 +805,7 @@ function mouseMove(e){
         mouseY = e.layerY;
     }
 
-
-    if(mouseX >= 243){
-        mouseX = mouseX - 243;
-    } else {
-        mouseX = 0 - (243 - mouseX); 
-    }
-
-    if(mouseY >= 242){
-        mouseY = mouseY - 242;
-    } else {
-        mouseY = 0 - (242 - mouseY);
-    }
-
-    cannon.angle = Math.atan2((mouseX - 2*mouseX), mouseY);
-
+    //Flips Stalwart based on x of mouse if necessary
     if(mouseX <= cannon.x) {
         stalwart.x = 255;
         stalwart.image.src = "stalwartFaceLeft.gif";
@@ -823,6 +813,22 @@ function mouseMove(e){
         stalwart.x = 235;
         stalwart.image.src = "stalwartFaceRight.gif";
     }
+
+    //Creates separate two dimentsional planes based on the quadrant that the mouse falls in.
+    if(mouseX >= cannon.x){
+        relativeX = mouseX - cannon.x;
+    } else {
+        relativeX = 0 - (cannon.x - mouseX); 
+    }
+
+    if(mouseY >= cannon.y){
+        relativeY = mouseY - cannon.y;
+    } else {
+        relativeY = 0 - (cannon.y - mouseY);
+    }
+
+    //Adjusting angle of cannon accordingly
+    cannon.angle = Math.atan2((relativeX - 2*relativeX), relativeY);
 }
 
 function updateBoat() {
